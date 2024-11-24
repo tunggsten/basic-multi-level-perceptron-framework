@@ -10,14 +10,6 @@ import time
 import ast
 
 
-
-def sigmoid(input:float):
-    return 1 / (1 + math.exp(-input))
-
-def softplus(input:float):
-    return math.log(1 + math.exp(input), math.e)
-
-
 LRELULEAKSLOPE = 0.1
 
 def l_ReLU(input:float):
