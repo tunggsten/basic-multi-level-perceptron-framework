@@ -279,7 +279,9 @@ class Network:
         choice = input(f"\n--- WARNING --- \n You are attempting to save a model. This will permenantly overwrite everything in {filename}. Are you sure? (yes/no)\n")
 
         if choice.lower() == "yes":
-            with open(filename, "w") as f:
+            open(filename, 'w').close()
+
+            with open(filename, "w+") as f:
                 f.write(self.export_model())
             
             print("Saved!")
@@ -412,11 +414,12 @@ def generate_network_from_model(model:str):
 
         
 startTime = time.time()
-testNetwork = Network([3, 4, 8])
+testNetwork = generate_network_from_model("testNetwork.model")
 print(f"Loaded model in {time.time() - startTime} seconds.")
 
 
 
+# This dataset is three digits of binary as the input, and the decimal digit they correspond to as the output.
 trainingInputs = [[0, 0, 0],
                   [0, 0, 1],
                   [0, 1, 0],
@@ -450,3 +453,5 @@ for i in range(5000):
         testNetwork.generate_output(trainingInputs[i])
         print(f"Output is {testNetwork.get_output()}")
         print(f"Loss is {testNetwork.get_ssr([0, 0, 1, 0, 0, 0, 0, 0])}\n")
+
+testNetwork.save_model_to_file("testNetwork.model")
