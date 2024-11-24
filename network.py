@@ -30,10 +30,10 @@ class Neuron:
 
         self.neuronIndex = None
 
-        self.dWeightByDCost = []
-        self.dBiasByDCost = 0
+        self.dCostByDWeights = []
+        self.dCostByDBias = 0
 
-        self.dPreviousActivationsByDCost = []
+        self.dCostByDActivation = 0
 
     def export_parameters(self):
         return(f"{self.weights}\\{self.bias}\n")
@@ -62,8 +62,21 @@ class Neuron:
     def get_d_activation_by_d_weighted_input(self):
         return 1 if self.weightedInput >= 0 else LRELULEAKSLOPE
     
-    def get_d_cost_by_d_weight(self, weightIndex:int, dCostByDActivation:float):
-        return self.get_d_input_by_d_weight() * self.get_d_activation_by_d_input() * dCostByDActivation
+
+
+    def calculate_derivatives(self):
+        self.dCostByDActivation = 0
+        self.dCostByDWeights = []
+        self.dCostByDBias = 0
+
+        if self.nextLayer:
+            for neuron in self.nextLayer:
+                self.dCostByDActivation += neuron.weights[self.neuronIndex] * neuron.get_d_activation_by_d_weighted_input() * neuron.dCostByDActivation 
+
+        if self.previousLayer:
+            for i in range(self.previousLayer.size):
+                self.dCostByDWeights.append(self.dCostByDActivation * self.previousLayer.neurons[i].activation)
+        pass
 
 
 
