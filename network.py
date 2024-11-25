@@ -388,6 +388,7 @@ def generate_network_from_model(model:str):
     try:
         with open(model, "r") as f:
             topLayer = -1
+            topNeuron = -1
 
             for line in f.readlines():
                 if line[0] == "l":
@@ -395,63 +396,40 @@ def generate_network_from_model(model:str):
 
                     network.layers.append(Layer(0))
                     topLayer += 1
-
                     topNeuron = -1
 
                 else:
                     info = line.split("\\")
 
                     topNeuron += 1
+                    
                     network.layers[topLayer].neurons.append(Neuron(ast.literal_eval(info[0]), float(info[1])))
                     network.layers[topLayer].neurons[topNeuron].neuronIndex = topNeuron
 
-            network.initialise_layer_parameters()
+        
+        print("Initialising layer parameters!")
+        network.layerCount = len(network.layers)
+        
+        for i in range(1, network.layerCount):
+            print(f"Setting up layer {i}'s previous layer")
+            network.layers[i].previousLayer = network.layers[i - 1]
+            
+        for i in range(network.layerCount - 1):
+            network.layers[i].nextLayer = network.layers[i + 1]
 
-            return network
+        for layer in network.layers:
+            layer.size = len(layer.neurons)
+
+        network.inputLayer = network.layers[0]
+        network.outputLayer = network.layers[network.layerCount - 1]
+
+        for layer in network.layers:
+            
+            for i in range(layer.size):
+                layer.neurons[i].previousLayer = layer.previousLayer
+                layer.neurons[i].nextLayer = layer.nextLayer
+                layer.neurons[i].neuronIndex = i
+
+        return network
     except:
         print("Could not interpret model data; your model file may be corrupted or a model file by this name couldn't be found.")
-
-
-        
-startTime = time.time()
-testNetwork = generate_network_from_model("testNetwork.model")
-print(f"Loaded model in {time.time() - startTime} seconds.")
-
-
-
-# This dataset is three digits of binary as the input, and the decimal digit they correspond to as the output.
-trainingInputs = [[0, 0, 0],
-                  [0, 0, 1],
-                  [0, 1, 0],
-                  [0, 1, 1],
-                  [1, 0, 0],
-                  [1, 0, 1],
-                  [1, 1, 0],
-                  [1, 1, 1]]
-
-trainingOutputs = [[1, 0, 0, 0, 0, 0, 0, 0],
-                   [0, 1, 0, 0, 0, 0, 0, 0],
-                   [0, 0, 1, 0, 0, 0, 0, 0],
-                   [0, 0, 0, 1, 0, 0, 0, 0],
-                   [0, 0, 0, 0, 1, 0, 0, 0],
-                   [0, 0, 0, 0, 0, 1, 0, 0],
-                   [0, 0, 0, 0, 0, 0, 1, 0],
-                   [0, 0, 0, 0, 0, 0, 0, 1]]
-
-
-
-print("Starting training cycles... \n\n\n")
-
-for i in range(5000):
-    print(f"--- STARTING TRAINING CYCLE {i + 1}")
-    startTime = time.time()
-    testNetwork.train(trainingInputs, trainingOutputs, 0.05)
-    print(f"Finished training cycle in {time.time() - startTime} seconds.")
-
-    for i in range(8):
-        print(f"Testing for input {trainingInputs[i]}")
-        testNetwork.generate_output(trainingInputs[i])
-        print(f"Output is {testNetwork.get_output()}")
-        print(f"Loss is {testNetwork.get_ssr([0, 0, 1, 0, 0, 0, 0, 0])}\n")
-
-testNetwork.save_model_to_file("testNetwork.model")
