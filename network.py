@@ -15,6 +15,12 @@ LRELULEAKSLOPE = 0.1
 def l_ReLU(input:float):
     return input if input >= 0 else LRELULEAKSLOPE * input
 
+def sigmoid(input:float):
+    return 1 / (1 + math.exp(-input))
+
+def d_sigmoid_by_d_x(input:float):
+    return sigmoid(input) * (1 - sigmoid(input))
+
 
 
 class Neuron:
@@ -59,7 +65,7 @@ class Neuron:
 
         self.weightedInput += self.bias
 
-        self.activation = l_ReLU(self.weightedInput)
+        self.activation = sigmoid(self.weightedInput)
 
 
     
@@ -97,7 +103,7 @@ class Neuron:
             return self.previousLayer.neurons[weightIndex].activation
     
     def get_d_activation_by_d_weighted_input(self):
-        return 1 if self.weightedInput >= 0 else LRELULEAKSLOPE
+        return d_sigmoid_by_d_x(self.weightedInput)
     
 
 
@@ -247,7 +253,9 @@ class Network:
         self.initialise_layer_parameters()
 
     def initialise_layer_parameters(self):
+        print("Initialising layer parameters!")
         for i in range(1, self.layerCount):
+            print(f"Setting up layer {i}'s previous layer")
             self.layers[i].previousLayer = self.layers[i - 1]
             
         for i in range(self.layerCount - 1):
@@ -335,7 +343,7 @@ class Network:
 
     
     def get_ssr(self, expected:list[float]):
-        outputs = self.outputLayer.get_layer_activation()
+        outputs = self.get_output()
 
         SSR = 0
 
@@ -405,53 +413,8 @@ def generate_network_from_model(model:str):
                     network.layers[topLayer].neurons.append(Neuron(ast.literal_eval(info[0]), float(info[1])))
                     network.layers[topLayer].neurons[topNeuron].neuronIndex = topNeuron
 
-            network.initialise_layer_parameters()
+        network.initialise_layer_parameters()
 
-            return network
+        return network
     except:
         print("Could not interpret model data; your model file may be corrupted or a model file by this name couldn't be found.")
-
-
-        
-startTime = time.time()
-testNetwork = generate_network_from_model("testNetwork.model")
-print(f"Loaded model in {time.time() - startTime} seconds.")
-
-
-
-# This dataset is three digits of binary as the input, and the decimal digit they correspond to as the output.
-trainingInputs = [[0, 0, 0],
-                  [0, 0, 1],
-                  [0, 1, 0],
-                  [0, 1, 1],
-                  [1, 0, 0],
-                  [1, 0, 1],
-                  [1, 1, 0],
-                  [1, 1, 1]]
-
-trainingOutputs = [[1, 0, 0, 0, 0, 0, 0, 0],
-                   [0, 1, 0, 0, 0, 0, 0, 0],
-                   [0, 0, 1, 0, 0, 0, 0, 0],
-                   [0, 0, 0, 1, 0, 0, 0, 0],
-                   [0, 0, 0, 0, 1, 0, 0, 0],
-                   [0, 0, 0, 0, 0, 1, 0, 0],
-                   [0, 0, 0, 0, 0, 0, 1, 0],
-                   [0, 0, 0, 0, 0, 0, 0, 1]]
-
-
-
-print("Starting training cycles... \n\n\n")
-
-for i in range(5000):
-    print(f"--- STARTING TRAINING CYCLE {i + 1}")
-    startTime = time.time()
-    testNetwork.train(trainingInputs, trainingOutputs, 0.05)
-    print(f"Finished training cycle in {time.time() - startTime} seconds.")
-
-    for i in range(8):
-        print(f"Testing for input {trainingInputs[i]}")
-        testNetwork.generate_output(trainingInputs[i])
-        print(f"Output is {testNetwork.get_output()}")
-        print(f"Loss is {testNetwork.get_ssr([0, 0, 1, 0, 0, 0, 0, 0])}\n")
-
-testNetwork.save_model_to_file("testNetwork.model")
