@@ -2,19 +2,6 @@ from network import *
 
 import linecache
 
-import pygame
-
-pygame.init()
-
-#display = pygame.display.set_mode((854, 480))
-pygame.display.set_caption("MNIST")
-
-pygame.font.init()
-
-font = pygame.font.Font(None, 36)
-
-
-
 def interpret_mnist(mnistDataIndex:int):
     try:
         data = linecache.getline("MNISTtrain.csv", mnistDataIndex + 1)
@@ -36,23 +23,6 @@ def interpret_mnist(mnistDataIndex:int):
         return [inputs, expectedOutput]
     except:
         return interpret_mnist(0)
-        
-        
-
-def display_mnist(outputData:list[int], location:tuple=(16, 16), pixelSize:int=8):
-    writtenDigit = pygame.Surface((pixelSize * 28, pixelSize * 28 + 16))
-    
-    for row in range(28):
-        for collumb in range(28):
-            colour = outputData[row * 28 + collumb] * 255
-            pygame.draw.rect(writtenDigit, (colour, colour, colour), pygame.Rect(collumb * pixelSize, (row * pixelSize + 16), pixelSize, pixelSize))
-    
-    writtenDigit.blit(font.render("Input:", True, (255, 255, 255)), (0, 0))
-                             
-    display.blit(writtenDigit, location)
-    
-def display_expected(expected:list[int]):
-    pass
     
 
 choice = input("Welcome to the MNIST trainer. Would you like to start [F]resh, or load data from a file (type filename)? ")
@@ -113,25 +83,3 @@ for i in range(250):
     #if input.lower() == "yes":
     
     network.save_model_to_file(choice)
-
-
-'''
-running = True
-
-i = 0
-
-while running:
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-    testDigit = interpret_mnist(i)
-
-    i += 1
-            
-    display.fill((50, 150, 255))
-            
-    display_mnist(testDigit[0])
-        
-    pygame.display.flip()'''
