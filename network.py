@@ -285,16 +285,13 @@ class Network:
     def save_model_to_file(self, filename:str):
         if filename[-6 :] != ".model":
             print(f"{filename} isn't a valid .model file. Double check you're trying to save this to the right path")
-
-        choice = input(f"\n--- WARNING --- \n You are attempting to save a model. This will permenantly overwrite everything in {filename}. Are you sure? (yes/no)\n")
-
-        if choice.lower() == "yes":
-            open(filename, 'w').close()
-
-            with open(filename, "w+") as f:
-                f.write(self.export_model())
             
-            print("Saved!")
+        open(filename, 'w').close()
+
+        with open(filename, "w+") as f:
+            f.write(self.export_model())
+            
+            print("Saved model!")
     
 
 
@@ -398,6 +395,7 @@ def generate_network_from_model(model:str):
     try:
         with open(model, "r") as f:
             topLayer = -1
+            topNeuron = -1
 
             for line in f.readlines():
                 if line[0] == "l":
@@ -405,17 +403,39 @@ def generate_network_from_model(model:str):
 
                     network.layers.append(Layer(0))
                     topLayer += 1
-
                     topNeuron = -1
 
                 else:
                     info = line.split("\\")
 
                     topNeuron += 1
+                    
                     network.layers[topLayer].neurons.append(Neuron(ast.literal_eval(info[0]), float(info[1])))
                     network.layers[topLayer].neurons[topNeuron].neuronIndex = topNeuron
 
-        network.initialise_layer_parameters()
+        
+        print("Initialising layer parameters!")
+        network.layerCount = len(network.layers)
+        
+        for i in range(1, network.layerCount):
+            print(f"Setting up layer {i}'s previous layer")
+            network.layers[i].previousLayer = network.layers[i - 1]
+            
+        for i in range(network.layerCount - 1):
+            network.layers[i].nextLayer = network.layers[i + 1]
+
+        for layer in network.layers:
+            layer.size = len(layer.neurons)
+
+        network.inputLayer = network.layers[0]
+        network.outputLayer = network.layers[network.layerCount - 1]
+
+        for layer in network.layers:
+            
+            for i in range(layer.size):
+                layer.neurons[i].previousLayer = layer.previousLayer
+                layer.neurons[i].nextLayer = layer.nextLayer
+                layer.neurons[i].neuronIndex = i
 
         return network
     except:
