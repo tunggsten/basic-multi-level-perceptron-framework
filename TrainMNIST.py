@@ -29,26 +29,26 @@ choice = input("Welcome to the MNIST trainer. Would you like to start [F]resh, o
 
 if choice.lower() == "f":
     choice = input("Enter the file you'd like to save to: ")
-    network = Network([784, 200, 100, 80, 10])
+    network = Network([784, 250, 150, 80, 30, 10])
 else:
     network = generate_network_from_model(choice)
 
 attempts = []
 previousLosses = []
 
-for i in range(250):
+for i in range(400):
     
     # Perform training cycle
     trainingInputs = []
     trainingOutputs = []
     
     for j in range(100):
-        data = interpret_mnist((i) * 100 + j)
+        data = interpret_mnist((i) * 50 + j)
         
         trainingInputs.append(data[0])
         trainingOutputs.append(data[1])
         
-    network.train(trainingInputs, trainingOutputs, 0.005)
+    network.train(trainingInputs, trainingOutputs, 0.01)
     
     print(f"\nFinished training cycle {i}.")
     
