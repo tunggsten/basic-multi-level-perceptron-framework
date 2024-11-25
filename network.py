@@ -254,6 +254,8 @@ class Network:
 
     def initialise_layer_parameters(self):
         print("Initialising layer parameters!")
+        self.layerCount = len(self.layers)
+        
         for i in range(1, self.layerCount):
             print(f"Setting up layer {i}'s previous layer")
             self.layers[i].previousLayer = self.layers[i - 1]

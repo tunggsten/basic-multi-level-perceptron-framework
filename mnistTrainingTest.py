@@ -41,7 +41,7 @@ def display_mnist(outputData:list[int], location:tuple=(16, 16), pixelSize:int=8
     
     for row in range(28):
         for collumb in range(28):
-            colour = outputData[row * 28 + collumb]
+            colour = outputData[row * 28 + collumb] * 255
             pygame.draw.rect(writtenDigit, (colour, colour, colour), pygame.Rect(collumb * pixelSize, (row * pixelSize + 16), pixelSize, pixelSize))
     
     writtenDigit.blit(font.render("Input:", True, (255, 255, 255)), (0, 0))
@@ -53,15 +53,14 @@ def display_expected(expected:list[int]):
     
 
 
-testDigit = interpret_mnist(13)
+testDigit = interpret_mnist(14)
 print(testDigit)
-
 
 network = Network([784, 200, 100, 80, 10])
 
 oldLearningRate = 0.1
 
-for i in range(1000):
+for i in range(500):
     trainingInputs = []
     trainingOutputs = []
     
@@ -77,21 +76,34 @@ for i in range(1000):
     
     testData = interpret_mnist(i)
     network.generate_output(testData[0])
+
+    output = network.get_output()
+    guess = output.index(max(output))
+    actual = testData[1].index(max(testData[1]))
     
-    print(f"Predicted {network.get_output()}, expected {testData[1]}.  Loss is {network.get_ssr(testData[1])}")
+    print(f"Prediction: {output} Expected: {testData[1]}. \nLoss is {network.get_ssr(testData[1])}")
+    print(f"Predicted {guess}, expected {actual}. {"\nCorrect!" if guess == actual else f"\nIncorrect"}")
     
 network.save_model_to_file("MNISTmodel.model")
 
-"""
+
+'''
 running = True
 
+i = 0
+
 while running:
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
+    testDigit = interpret_mnist(i)
+
+    i += 1
             
     display.fill((50, 150, 255))
             
     display_mnist(testDigit[0])
         
-    pygame.display.flip()"""
+    pygame.display.flip()'''
