@@ -16,7 +16,7 @@ font = pygame.font.SysFont(None, 30)
 backgroundColour = (50, 150, 255)
 
 # initialise MASON
-mason = generate_network_from_model("newNewMNIST.model")
+mason = generate_network_from_model('ninetypercent copy.model')
 
 class mnistDigit:
     def __init__(self, position:tuple):
@@ -87,8 +87,9 @@ def display_mason_activations(position:tuple):
     
     for i in range(neuronCount):
         colour = math.floor(activations[i] * 255)
+        colour = colour if 0 <= colour <= 1 else 1
         
-        pygame.draw.rect(outputSurface, (colour, colour, colour), pygame.Rect((i % 16) * 8, (i // 16) * 8, 8, 8))
+        pygame.draw.rect(outputSurface, (colour, colour, colour), pygame.Rect((i % 28) * 8, (i // 28) * 8, 8, 8))
         
     window.blit(outputSurface, position)
     
@@ -98,9 +99,13 @@ def display_mason_output(position:tuple):
     outputSurface.fill(backgroundColour)
     
     output = mason.get_output()
+    print(output)
     
     for i in range(10):
         colour = math.floor(output[i] * 255)
+        colour = colour if 0 <= colour <= 1 else 1
+
+        print(colour)
         pygame.draw.rect(outputSurface, (colour, colour, colour), (i * 16, 0, 16, 16))
         
     outputSurface.blit(font.render(f"Guess: {output.index(max(output))}", True, (255, 255, 255)), (0, 16))

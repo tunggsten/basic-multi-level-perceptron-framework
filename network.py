@@ -64,7 +64,7 @@ class Neuron:
 
         self.weightedInput += self.bias
 
-        self.activation = sigmoid(self.weightedInput)
+        self.activation = l_ReLU(self.weightedInput)
 
 
     
@@ -102,7 +102,7 @@ class Neuron:
             return self.previousLayer.neurons[weightIndex].activation
     
     def get_d_activation_by_d_weighted_input(self):
-        return d_sigmoid_by_d_x(self.weightedInput)
+        return 1 if (self.weightedInput > 0) else LRELULEAKSLOPE
     
 
 
@@ -165,7 +165,7 @@ class Layer:
 
             if self.previousLayer:
                 for j in range(self.previousLayer.size):
-                    self.neurons[i].weights.append(random.normalvariate())
+                    self.neurons[i].weights.append(random.normalvariate() * 0.000000001)
 
 
 
@@ -391,51 +391,48 @@ def generate_network_from_model(model:str):
 
     network.layers = []
 
-    try:
-        with open(model, "r") as f:
-            topLayer = -1
-            topNeuron = -1
+    with open(model) as f:
+        topLayer = -1
+        topNeuron = -1
 
-            for line in f.readlines():
-                if line[0] == "l":
-                    info = line.split("\\")
+        for line in f.readlines():
+            if line[0] == "l":
+                info = line.split("\\")
 
-                    network.layers.append(Layer(0))
-                    topLayer += 1
-                    topNeuron = -1
+                network.layers.append(Layer(0))
+                topLayer += 1
+                topNeuron = -1
 
-                else:
-                    info = line.split("\\")
+            else:
+                info = line.split("\\")
 
-                    topNeuron += 1
-                    
-                    network.layers[topLayer].neurons.append(Neuron(ast.literal_eval(info[0]), float(info[1])))
-                    network.layers[topLayer].neurons[topNeuron].neuronIndex = topNeuron
+                topNeuron += 1
+                
+                network.layers[topLayer].neurons.append(Neuron(ast.literal_eval(info[0]), float(info[1])))
+                network.layers[topLayer].neurons[topNeuron].neuronIndex = topNeuron
 
+    
+    print("Initialising layer parameters!")
+    network.layerCount = len(network.layers)
+    
+    for i in range(1, network.layerCount):
+        print(f"Setting up layer {i}'s previous layer")
+        network.layers[i].previousLayer = network.layers[i - 1]
         
-        print("Initialising layer parameters!")
-        network.layerCount = len(network.layers)
+    for i in range(network.layerCount - 1):
+        network.layers[i].nextLayer = network.layers[i + 1]
+
+    for layer in network.layers:
+        layer.size = len(layer.neurons)
+
+    network.inputLayer = network.layers[0]
+    network.outputLayer = network.layers[network.layerCount - 1]
+
+    for layer in network.layers:
         
-        for i in range(1, network.layerCount):
-            print(f"Setting up layer {i}'s previous layer")
-            network.layers[i].previousLayer = network.layers[i - 1]
-            
-        for i in range(network.layerCount - 1):
-            network.layers[i].nextLayer = network.layers[i + 1]
+        for i in range(layer.size):
+            layer.neurons[i].previousLayer = layer.previousLayer
+            layer.neurons[i].nextLayer = layer.nextLayer
+            layer.neurons[i].neuronIndex = i
 
-        for layer in network.layers:
-            layer.size = len(layer.neurons)
-
-        network.inputLayer = network.layers[0]
-        network.outputLayer = network.layers[network.layerCount - 1]
-
-        for layer in network.layers:
-            
-            for i in range(layer.size):
-                layer.neurons[i].previousLayer = layer.previousLayer
-                layer.neurons[i].nextLayer = layer.nextLayer
-                layer.neurons[i].neuronIndex = i
-
-        return network
-    except:
-        print("Could not interpret model data; your model file may be corrupted or a model file by this name couldn't be found.")
+    return network
