@@ -16,7 +16,7 @@ font = pygame.font.SysFont(None, 30)
 backgroundColour = (50, 150, 255)
 
 # initialise MASON
-mason = generate_network_from_model("ninetypercent.model")
+mason = generate_network_from_model("newNewMNIST.model")
 
 class mnistDigit:
     def __init__(self, position:tuple):
