@@ -109,6 +109,8 @@ def display_mason_output(position:tuple):
         
 digit = mnistDigit((16, 16))
 
+mason.generate_output(digit.contents)
+
 running = True
 while running:
     for event in pygame.event.get():
