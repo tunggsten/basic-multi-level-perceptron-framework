@@ -16,7 +16,7 @@ font = pygame.font.SysFont(None, 30)
 backgroundColour = (50, 150, 255)
 
 # initialise MASON
-mason = generate_network_from_model("newNewMNIST.model")
+mason = generate_network_from_model("ninetypercent.model")
 
 class mnistDigit:
     def __init__(self, position:tuple):
@@ -119,10 +119,12 @@ while running:
     mouseButtons = pygame.mouse.get_pressed()
     if mouseButtons[0]:
         digit.draw(pygame.mouse.get_pos(), 1, 1.5)
+        mason.generate_output(digit.contents)
     elif mouseButtons[2]:
         digit.erase(pygame.mouse.get_pos(), 2, 2.5)
+        mason.generate_output(digit.contents)
         
-    mason.generate_output(digit.contents)
+    
                     
     window.fill(backgroundColour)
     
