@@ -279,16 +279,14 @@ class Network:
     def save_model_to_file(self, filename:str):
         if filename[-6 :] != ".model":
             print(f"{filename} isn't a valid .model file. Double check you're trying to save this to the right path")
+            return
 
-        choice = input(f"\n--- WARNING --- \n You are attempting to save a model. This will permenantly overwrite everything in {filename}. Are you sure? (yes/no)\n")
+        open(filename, 'w').close()
 
-        if choice.lower() == "yes":
-            open(filename, 'w').close()
-
-            with open(filename, "w+") as f:
-                f.write(self.export_model())
-            
-            print("Saved!")
+        with open(filename, "w+") as f:
+            f.write(self.export_model())
+        
+        print("Saved!")
     
 
 
