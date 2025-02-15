@@ -2,7 +2,8 @@
 
 from network import *
 import math
-import linecache
+
+import time
 
 import pygame
 
@@ -40,7 +41,9 @@ class mnistDigit:
                 
         window.blit(inputSurface, self.position)
                 
-    def draw(self, brushLocation, brushSize, brushPower):
+
+    # this function is pretty scuffed but it could be worse tbf
+    def draw(self, brushChange, brushLocation, brushSize, brushPower, frameDelta):
         brushLocationRelative = (brushLocation[0] - self.position[0], brushLocation[1] - self.position[1])
         brushLocationRelative = (brushLocationRelative[0] / 8, brushLocationRelative[1] / 8)
         for row in range(28):
@@ -48,30 +51,15 @@ class mnistDigit:
                 distance = math.sqrt((collumb - brushLocationRelative[0]) ** 2 + (row - brushLocationRelative[1]) ** 2)
                 
                 if distance < brushSize:
-                    self.contents[row * 28 + collumb] += 1
+                    self.contents[row * 28 + collumb] += brushChange * frameDelta
                 elif distance < brushPower:
-                    self.contents[row * 28 + collumb] += (distance - brushPower) / 4 * (brushSize - brushPower)
+                    self.contents[row * 28 + collumb] += (distance - brushPower) / 4 * (brushSize - brushPower) * frameDelta
                 else:
                     self.contents[row * 28 + collumb] += 0
                     
                 if self.contents[row * 28 + collumb] > 1:
                     self.contents[row * 28 + collumb] = 1
-                    
-    def erase(self, brushLocation, brushSize, brushPower):
-        brushLocationRelative = (brushLocation[0] - self.position[0], brushLocation[1] - self.position[1])
-        brushLocationRelative = (brushLocationRelative[0] / 8, brushLocationRelative[1] / 8)
-        for row in range(28):
-            for collumb in range(28):
-                distance = math.sqrt((collumb - brushLocationRelative[0]) ** 2 + (row - brushLocationRelative[1]) ** 2)
-                
-                if distance < brushSize:
-                    self.contents[row * 28 + collumb] -= 1
-                elif distance < brushPower:
-                    self.contents[row * 28 + collumb] -= (distance - brushPower) / 4 * (brushSize - brushPower)
-                else:
-                    self.contents[row * 28 + collumb] -= 0
-                    
-                if self.contents[row * 28 + collumb] < 0:
+                elif self.contents[row * 28 + collumb] < 0:
                     self.contents[row * 28 + collumb] = 0
                     
                     
@@ -112,7 +100,12 @@ digit = mnistDigit((16, 16))
 mason.generate_output(digit.contents)
 
 running = True
+
+fameDelta = 0.001
+
 while running:
+    startTime = time.time()
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -120,10 +113,10 @@ while running:
             
     mouseButtons = pygame.mouse.get_pressed()
     if mouseButtons[0]:
-        digit.draw(pygame.mouse.get_pos(), 1, 1.5)
+        digit.draw(100, pygame.mouse.get_pos(), 1, 1.5, frameDelta)
         mason.generate_output(digit.contents)
     elif mouseButtons[2]:
-        digit.erase(pygame.mouse.get_pos(), 2, 2.5)
+        digit.draw(-100, pygame.mouse.get_pos(), 2, 2.5, frameDelta)
         mason.generate_output(digit.contents)
         
     
@@ -138,3 +131,5 @@ while running:
     window.blit(font.render("recognition test!!!", True, (255, 255, 255)), (255, 16))
     
     pygame.display.update()
+
+    frameDelta = time.time() - startTime
