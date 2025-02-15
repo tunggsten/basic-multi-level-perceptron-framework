@@ -160,7 +160,7 @@ class Layer:
 
             if self.previousLayer:
                 for j in range(self.previousLayer.size):
-                    self.neurons[i].weights.append(random.normalvariate())
+                    self.neurons[i].weights.append(random.normalvariate(0, 0.001))
 
 
 
@@ -247,7 +247,11 @@ class Network:
         self.initialise_layer_parameters()
 
     def initialise_layer_parameters(self):
+        print("Initialising layer parameters!")
+        self.layerCount = len(self.layers)
+        
         for i in range(1, self.layerCount):
+            print(f"Setting up layer {i}'s previous layer")
             self.layers[i].previousLayer = self.layers[i - 1]
             
         for i in range(self.layerCount - 1):
@@ -341,6 +345,8 @@ class Network:
 
         for i in range(len(outputs)):
             SSR += (outputs[i] - expected[i]) ** 2
+
+        print(f"Loss is {SSR}")
 
         return SSR
     
