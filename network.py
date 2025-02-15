@@ -160,7 +160,7 @@ class Layer:
 
             if self.previousLayer:
                 for j in range(self.previousLayer.size):
-                    self.neurons[i].weights.append(random.normalvariate(0, 0.001))
+                    self.neurons[i].weights.append(random.normalvariate(0, 1 / self.size))
 
 
 
