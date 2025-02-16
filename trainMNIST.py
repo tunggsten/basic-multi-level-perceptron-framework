@@ -36,47 +36,20 @@ else:
 attempts = []
 previousLosses = []
 
-for i in range(0, 800):
+for i in range(0, 540):
     
     # Perform training cycle
     trainingInputs = []
     trainingOutputs = []
     
-    for j in range(50):
-        data = interpret_mnist((i) * 50 + j)
+    for j in range(75):
+        data = interpret_mnist((i) * 75 + j)
         
         trainingInputs.append(data[0])
         trainingOutputs.append(data[1])
         
-    network.train(trainingInputs, trainingOutputs, 0.0001)
+    network.train(trainingInputs, trainingOutputs, 0.01)
     
     print(f"\nFinished training cycle {i}.")
-    
-    attempts = []
-    testLosses = []
-    # Run test case
-    for k in range(100):
-        testData = interpret_mnist(30 * i + k)
-
-        network.generate_output(testData[0])
-        output = network.get_output()
-        
-        loss = network.get_ssr(testData[1])
-        
-        guess = output.index(max(output))
-        actual = testData[1].index(max(testData[1]))
-        
-        # Get average accuracy accross previous 100 attempts
-        attempts.append(1 if guess == actual else 0)
-        testLosses.append(loss)
-            
-        averageAccuracy = sum(attempts) / len(attempts)
-        averageLoss = sum(testLosses) / len(testLosses)
-        
-    print(f"Average accuracy of {averageAccuracy * 100}%")
-    print(f"Average loss of {averageLoss}")
-    
-    #input = input("Completed cycle. Do you want to save?")
-    #if input.lower() == "yes":
     
     network.save_model_to_file(choice)

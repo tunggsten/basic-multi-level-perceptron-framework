@@ -344,8 +344,6 @@ class Network:
         for i in range(len(outputs)):
             SSR += (outputs[i] - expected[i]) ** 2
 
-        print(f"Loss is {SSR}")
-
         return SSR
     
     
@@ -367,10 +365,19 @@ class Network:
 
         self.reset_average_parameters()
 
+        averageLoss = 0
+
         for i in range(sampleSize):
             self.generate_output(sampleInputs[i])
+
+            loss = self.get_ssr(sampleExpecteds[i])
+            averageLoss += loss
+
             self.backpropagate(sampleExpecteds[i])
             self.add_derivatives_to_averages()
+
+        averageLoss /= sampleSize
+        print(f"Average loss is {averageLoss}")
 
         self.scale_averages(sampleSize)
 
